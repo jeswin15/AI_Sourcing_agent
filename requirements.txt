@@ -1,0 +1,33 @@
+# Core Utilities
+python-dotenv
+requests
+feedparser  # For RSS feeds
+pandas
+numpy
+
+# LLM & AI
+langchain
+langchain-community
+langchain-openai  # Works for OpenRouter as well
+
+# Data Sources
+praw  # Reddit
+PyGithub  # GitHub
+graphql-client # Product Hunt
+
+# Database
+pymongo
+fuzzywuzzy  # Fuzzy matching
+python-Levenshtein
+
+# Google Sheets
+gspread
+oauth2client
+
+# Dashboard
+streamlit
+plotly
+st-annotated-text
+
+# Scheduler
+apscheduler

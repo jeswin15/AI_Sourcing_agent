@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Data and Secret Storage
+data/*.json
+!data/.gitkeep
+credentials*.json
+*.pickle
+
+# IDEs
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/
+static/
+
+# Logs
+*.log
+main.log
+engine.log
