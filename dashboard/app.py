@@ -16,6 +16,8 @@ from src.integrations.email_service import EmailService
 from src.engine.scoring import ScoringEngine
 import plotly.express as px
 import plotly.graph_objects as go
+import threading
+from src.engine.processor import ProcessOrchestrator
 
 # ── Page Config ──────────────────────────────────────────────
 st.set_page_config(
@@ -171,18 +173,55 @@ def get_db():
 db = get_db()
 
 
-# ── Sidebar ──────────────────────────────────────────────────
-st.sidebar.markdown("### 🔍 Filters")
-score_filter = st.sidebar.slider("Minimum Confidence Score", 0, 100, 40)
-all_sources = ["TechCrunch", "EU-Startups", "Sifted", "YCombinator-Blog",
-               "Show-HN-RSS", "HackerNews", "Reddit"]
-source_filter = st.sidebar.multiselect("Data Sources", all_sources, default=all_sources)
-status_filter = st.sidebar.selectbox("Status", ["All", "Pending", "Save", "Ignore", "Progress"], index=0)
+# ── Agent Threading Logic ────────────────────────────────────
+if "agent_running" not in st.session_state:
+    st.session_state.agent_running = False
 
-st.sidebar.markdown("---")
-if st.sidebar.button("🔄 Refresh Data"):
-    st.cache_resource.clear()
-    st.rerun()
+def run_agent_in_thread():
+    try:
+        # Move the orchestrator initialization inside the thread to avoid issues
+        orchestrator = ProcessOrchestrator()
+        # Reduce days for demo to speed up collection
+        orchestrator.run_cycle(days=3)
+    except Exception as e:
+        print(f"Agent Thread Error: {e}")
+    finally:
+        st.session_state.agent_running = False
+
+# ── Sidebar ──────────────────────────────────────────────────
+with st.sidebar:
+    st.markdown("### 🔍 Filters")
+    score_filter = st.slider("Minimum Confidence Score", 0, 100, 40)
+    
+    all_sources = ["TechCrunch", "EU-Startups", "Sifted", "YCombinator-Blog",
+                   "Show-HN-RSS", "HackerNews", "Reddit"]
+    
+    source_filter = st.multiselect(
+        "Data Sources",
+        all_sources,
+        default=all_sources
+    )
+    
+    status_filter = st.selectbox("Status", ["All", "Pending", "Save", "Ignore", "Progress"], index=0)
+    
+    st.markdown("---")
+    st.markdown("### 🚀 Pipeline Control")
+    
+    if st.session_state.agent_running:
+        st.warning("Agent is currently sourcing...")
+        st.button("⏳ Sourcing...", disabled=True, key="btn_running")
+    else:
+        if st.button("▶ Run Sourcing Cycle", key="btn_run"):
+            st.session_state.agent_running = True
+            thread = threading.Thread(target=run_agent_in_thread)
+            thread.daemon = True # Ensure it shuts down when app stops
+            thread.start()
+            st.success("Sourcing cycle started!")
+            st.rerun()
+
+    if st.button("🔄 Refresh Data", key="btn_refresh"):
+        st.cache_resource.clear()
+        st.rerun()
 
 # ── Header ───────────────────────────────────────────────────
 st.markdown('<h1 class="hero-title">Holocene Startup Sourcing Agent</h1>', unsafe_allow_html=True)
