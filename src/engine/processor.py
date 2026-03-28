@@ -4,7 +4,7 @@ import time
 from src.ingestion.rss_collectors import get_rss_collectors
 from src.ingestion.reddit_collector import RedditRSSCollector
 from src.ingestion.hn_collector import HNCollector
-from src.database.json_store import JSONStore
+from src.database.factory import get_db
 from src.database.deduplicator import Deduplicator
 from src.engine.llm_evaluator import LLMEvaluator
 from src.engine.scoring import ScoringEngine
@@ -19,7 +19,7 @@ class ProcessOrchestrator:
         self.collectors = []
         self._initialize_collectors()
 
-        self.db = JSONStore()
+        self.db = get_db()
         self.deduplicator = Deduplicator()
         self.evaluator = LLMEvaluator()
         self.scoring = ScoringEngine()

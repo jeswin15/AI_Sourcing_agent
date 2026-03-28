@@ -21,6 +21,7 @@ class Config:
     GSHEET_NAME = os.getenv("GSHEET_NAME", "Holocene Startup Sourcing")
 
     # Database
+    DATABASE_TYPE = os.getenv("DATABASE_TYPE", "local_json")
     MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
     MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "holocene_sourcing")
 

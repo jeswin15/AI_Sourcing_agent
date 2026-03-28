@@ -1,7 +1,9 @@
 from pymongo import MongoClient
 from typing import List, Dict, Optional
+from datetime import datetime
 from src.utils.config import Config
 import logging
+import pymongo
 
 class MongoDBClient:
     def __init__(self):
@@ -13,9 +15,9 @@ class MongoDBClient:
             self.client.server_info()
             self.db = self.client[Config.MONGO_DB_NAME]
             self.startups = self.db.startups
-            self.feedback = self.db.feedback_memory
+            self.feedback = self.db.feedback
             self.is_connected = True
-            self.logger.info(f"Connected to MongoDB: {Config.MONGO_DB_NAME}")
+            self.logger.info(f"Connected to MongoDB Atlas: {Config.MONGO_DB_NAME}")
         except Exception as e:
             self.logger.warning(f"Could not connect to MongoDB, using In-Memory Storage for Demo: {e}")
             self.client = None
@@ -97,4 +99,16 @@ class MongoDBClient:
             "reason": reason,
             "timestamp": datetime.now().isoformat()
         }
-        self.feedback.insert_one(feedback_entry)
+        try:
+            self.feedback.insert_one(feedback_entry)
+        except Exception as e:
+            self.logger.error(f"Error adding feedback: {e}")
+
+    def get_all_feedback(self) -> List[Dict]:
+        if not self.is_connected:
+            return self.in_memory_feedback
+        try:
+            return list(self.feedback.find({}))
+        except Exception as e:
+            self.logger.error(f"Error fetching feedback: {e}")
+            return []
