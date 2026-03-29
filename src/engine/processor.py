@@ -90,9 +90,9 @@ class ProcessOrchestrator:
             else:
                 self.logger.warning(f"  [FAIL] Evaluation failed, skipped")
 
-            # Rate limit: wait between requests (free tier = 8 req/min)
+            # Rate limit: safe for free tier (2 RPM limit)
             if i < len(unique_items) - 1:
-                time.sleep(20)  # Increased delay for free-tier stability
+                time.sleep(45)  # Increased to 45s for MVC stability
 
         self.logger.info("=" * 60)
         self.logger.info(f"Cycle complete. Evaluated: {evaluated_count}, Saved: {saved_count}")
