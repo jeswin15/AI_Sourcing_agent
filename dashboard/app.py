@@ -193,20 +193,24 @@ if "saved_ids" not in st.session_state:
     st.session_state.saved_ids = set()
 
 def refresh_discovery_batch(force=False):
-    """Picks 6-7 random startups to discover."""
+    """Picks random startups for the discovery batch."""
     if not st.session_state.discovery_ids or force:
         all_startups = db.get_all_startups()
-        # Filter for Pending and not already pinned
+        # Filter: Must not be already Pinned/Saved or Ignored
         available = [s.get("link") for s in all_startups 
                     if s.get("status", "Pending") == "Pending" 
                     and s.get("link") not in st.session_state.saved_ids]
         
         if not available:
-            st.session_state.discovery_ids = []
-            return
+            # Fallback: If no Pending left, show all non-Saved/N/A just to keep it running
+            available = [s.get("link") for s in all_startups if s.get("link") not in st.session_state.saved_ids]
 
-        num_to_pick = min(6, len(available))
-        st.session_state.discovery_ids = random.sample(available, num_to_pick)
+        if available:
+            # Sampling logic for consistent batch experience
+            num_to_pick = min(6, len(available))
+            st.session_state.discovery_ids = random.sample(available, num_to_pick)
+        else:
+            st.session_state.discovery_ids = []
 
 # Initial discovery load
 refresh_discovery_batch()
@@ -237,7 +241,7 @@ with st.sidebar:
         st.cache_resource.clear()
         st.rerun()
 
-    st.info("Discovery Mode Active: Focused on curated batch evaluation.")
+    st.info("Discovery Mode: Focusing on 6 high-potential startups per session.")
 
 # ── Main Header ──────────────────────────────────────────────
 st.markdown('<h1 class="hero-title">Holocene Discovery Engine</h1>', unsafe_allow_html=True)
@@ -257,19 +261,14 @@ if source_filter:
     filtered = [s for s in filtered if s.get("source") in source_filter]
 
 # ── Metrics Row ──────────────────────────────────────────────
-m1, m2, m3, m4 = st.columns(4)
+m1, padding, m2 = st.columns([1, 0.5, 1])
 total_db = len(all_startups)
 avg_score = sum(s.get("confidence_score", 0) for s in all_startups) / total_db if total_db else 0
-high_quality = len([s for s in all_startups if s.get("confidence_score", 0) >= 70])
 in_view = len(filtered)
 
 with m1:
-    st.markdown(f'<div class="metric-card"><div class="metric-value">{total_db}</div><div class="metric-label">Total Pipeline</div></div>', unsafe_allow_html=True)
-with m2:
     st.markdown(f'<div class="metric-card"><div class="metric-value">{avg_score:.0f}%</div><div class="metric-label">Avg Quality</div></div>', unsafe_allow_html=True)
-with m3:
-    st.markdown(f'<div class="metric-card"><div class="metric-value">{high_quality}</div><div class="metric-label">Top Tier (70+)</div></div>', unsafe_allow_html=True)
-with m4:
+with m2:
     st.markdown(f'<div class="metric-card"><div class="metric-value">{in_view}</div><div class="metric-label">Active Batch</div></div>', unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
