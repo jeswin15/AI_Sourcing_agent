@@ -18,7 +18,7 @@ from src.database.factory import get_db
 
 # ── Page Config ──────────────────────────────────────────────
 st.set_page_config(
-    page_title="Holocene | Discovery Engine",
+    page_title="Early-Stage Investment Agent",
     page_icon="🚀",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -244,7 +244,7 @@ with st.sidebar:
     st.info("Discovery Mode: Focusing on 6 high-potential startups per session.")
 
 # ── Main Header ──────────────────────────────────────────────
-st.markdown('<h1 class="hero-title">Holocene Discovery Engine</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="hero-title">Early-Stage Investment Agent</h1>', unsafe_allow_html=True)
 st.markdown(f'<p class="hero-subtitle">Currently exploring {len(st.session_state.discovery_ids)} high-potential AI ventures</p>', unsafe_allow_html=True)
 
 # ── Load & Filter Display Data ───────────────────────────────
